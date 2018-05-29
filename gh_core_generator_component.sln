@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core_generator", "fold\core_generator.csproj", "{DEBC92B2-0EC5-4050-B355-31AB43FB8521}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug32|Any CPU = Debug32|Any CPU
+		Debug64|Any CPU = Debug64|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Debug32|Any CPU.ActiveCfg = Debug32|Any CPU
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Debug32|Any CPU.Build.0 = Debug32|Any CPU
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Debug64|Any CPU.ActiveCfg = Debug64|Any CPU
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Debug64|Any CPU.Build.0 = Debug64|Any CPU
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEBC92B2-0EC5-4050-B355-31AB43FB8521}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0754B48C-4010-440E-826C-B477312E00F3}
+	EndGlobalSection
+EndGlobal
