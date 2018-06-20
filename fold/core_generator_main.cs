@@ -30,15 +30,17 @@ namespace core_generator
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("type", "type", "type", GH_ParamAccess.item, 2);
-            pManager.AddIntegerParameter("skin_width", "skin_width", "skin_width", GH_ParamAccess.item, 5);
-            pManager.AddIntegerParameter("skin_height", "skin_height", "skin_height", GH_ParamAccess.item, 5);
+            pManager.AddIntegerParameter("type", "type", "type", GH_ParamAccess.item, 0);
 
+            pManager.AddBooleanParameter("allow_skin_variation", "allow_skin_variation", "allow_skin_variation", GH_ParamAccess.item, false);
+            pManager.AddIntegerParameter("skin_width", "skin_width", "skin_width", GH_ParamAccess.item, 10);
+            pManager.AddIntegerParameter("skin_height", "skin_height", "skin_height", GH_ParamAccess.item, 10);
+
+            pManager.AddBooleanParameter("allow_core_variation", "allow_core_variation", "allow_core_variation", GH_ParamAccess.item, false);
             pManager.AddIntegerParameter("core_min_width", "core_min_width", "core_min_width", GH_ParamAccess.item, 5);
             pManager.AddIntegerParameter("core_min_height", "core_min_height", "core_min_height", GH_ParamAccess.item, 5);
 
-            pManager.AddNumberParameter("efficiency", "efficiency", "value 0.0 - 1.0", GH_ParamAccess.item, 0.15);
-
+            pManager.AddNumberParameter("efficiency", "efficiency", "value 0.0 - 1.0", GH_ParamAccess.item, 0.25);
             pManager.AddNumberParameter("deviation", "deviation", "value 0.0 - 1.0", GH_ParamAccess.item, 0.0);
         }
 
@@ -61,22 +63,27 @@ namespace core_generator
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             int type_index = 0;
+            bool allow_skin_variation = false;
             int max_skin_width = 0;
             int max_skin_height = 0;
+            bool allow_core_variation = false;
             int core_min_width = 0;
             int core_min_height = 0;
             double efficiency = 0;
             double deviation = 0.0;
+            
 
             DA.GetData(0, ref type_index);
-            DA.GetData(1, ref max_skin_width);
-            DA.GetData(2, ref max_skin_height);
-            DA.GetData(3, ref core_min_width);
-            DA.GetData(4, ref core_min_height);
-            DA.GetData(5, ref efficiency);
-            DA.GetData(6, ref deviation);
+            DA.GetData(1, ref allow_skin_variation);
+            DA.GetData(2, ref max_skin_width);
+            DA.GetData(3, ref max_skin_height);
+            DA.GetData(4, ref allow_core_variation);
+            DA.GetData(5, ref core_min_width);
+            DA.GetData(6, ref core_min_height);
+            DA.GetData(7, ref efficiency);
+            DA.GetData(8, ref deviation);
 
-            generate_tower gt = new generate_tower(ref type_index, ref max_skin_width, ref max_skin_height, ref core_min_width, ref core_min_height, ref efficiency, ref deviation);
+            generate_tower gt = new generate_tower(ref type_index, ref allow_skin_variation, ref max_skin_width, ref max_skin_height, ref allow_core_variation, ref core_min_width, ref core_min_height, ref efficiency, ref deviation);
 
             switch (type_index)
             {

@@ -17,8 +17,10 @@ namespace core_generator
     {
         //public List<Item> pjsonEnv = new List<Item>();
         public int type_index;
+        public bool allow_skin_variation;
         public int max_skin_width;
         public int max_skin_height;
+        public bool allow_core_variation;
         public int core_min_width;
         public int core_min_height;
         public double efficiency;
@@ -46,12 +48,14 @@ namespace core_generator
         public DataTree<Point3d> grid_pts_tree;
         public DataTree<int> grid_val;
         
-        public generate_tower(ref int ti, ref int sw, ref int sh, ref int cw, ref int ch, ref double e, ref double d)
+        public generate_tower(ref int ti, ref bool asv, ref int sw, ref int sh, ref bool acv, ref int cw, ref int ch, ref double e, ref double d)
         {
             // initialize values
             type_index = ti;
+            allow_skin_variation = asv;
             max_skin_width = sw;
             max_skin_height = sh;
+            allow_core_variation = acv;
             core_min_width = cw;
             core_min_height = ch;
 
@@ -67,14 +71,13 @@ namespace core_generator
             switch (type_index)
             {
                 case 0:
-                    gen_single_core gsc = new gen_single_core(max_skin_width, max_skin_height, core_min_width, core_min_height, efficiency, deviation);
+                    gen_single_core gsc = new gen_single_core(allow_skin_variation, max_skin_width, max_skin_height, allow_core_variation, core_min_width, core_min_height, efficiency, deviation);
                     cores = gsc.core_list;
                     grid_pts = gsc.g_pts;
                     grid_val = gsc.g_val;
                     break;
                 case 1:
-                    gen_dual_core gdc = new gen_dual_core(max_skin_width, max_skin_height, core_min_width, core_min_height, efficiency, deviation);
-                    cores_1 = gdc.core_list;
+                    gen_dual_core gdc = new gen_dual_core(max_skin_width, max_skin_height, allow_core_variation, core_min_width, core_min_height, efficiency, deviation);
                     cores_2_tree = gdc.cores_2_tree;
                     grid_pts = gdc.g_pts;
                     grid_val = gdc.g_val;
@@ -92,7 +95,7 @@ namespace core_generator
                     grid_pts_tree = gsv.g_pts;
                     grid_val = gsv.g_val;
                     break;
-            }            
+            }
         }
     }
 }
