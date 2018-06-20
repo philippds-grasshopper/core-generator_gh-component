@@ -78,6 +78,7 @@ namespace core_generator
                     break;
                 case 1:
                     gen_dual_core gdc = new gen_dual_core(max_skin_width, max_skin_height, allow_core_variation, core_min_width, core_min_height, efficiency, deviation);
+                    variable_skin = gdc.skin_list;
                     cores_2_tree = gdc.cores_2_tree;
                     grid_pts = gdc.g_pts;
                     grid_val = gdc.g_val;

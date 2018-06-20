@@ -94,7 +94,8 @@ namespace core_generator
                     DA.SetDataList(3, gt.cores);
                     break;
                 case 1:
-                    DA.SetData(0, gt.skin);
+                    if (!allow_skin_variation) { DA.SetData(0, gt.skin); }
+                    else { DA.SetDataList(0, gt.variable_skin); }
                     DA.SetDataList(1, gt.grid_pts);
                     DA.SetDataTree(2, gt.grid_val);
                     DA.SetDataTree(3, gt.cores_2_tree);
