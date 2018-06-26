@@ -16,37 +16,35 @@ namespace core_generator
     class gen_skin
     {
         public List<Rectangle3d> skin;
-        private int max_skin_width;
-        private int max_skin_height;
-        private bool variety;
+        private int skin_width;
+        private int skin_height;
         private double deviation;
         private int area;
 
-        public gen_skin(int max_skin_width, int max_skin_height, bool variety, double deviation)
+        public gen_skin(int skin_width, int skin_height, double deviation)
         {
-            this.max_skin_width = max_skin_width;
-            this.max_skin_height = max_skin_height;
-            this.variety = variety;
+            this.skin_width = skin_width;
+            this.skin_height = skin_height;
             this.deviation = deviation;
-            this.area = max_skin_width * max_skin_height;
-
+            this.area = skin_width * skin_height;
         }
 
         public void compute()
         {
-            if(variety) { multiple_skin(); }
+            if(deviation != 0.0) { multiple_skin(); }
             else { single_skin(); }
         }
 
         public void single_skin()
         {
-            this.skin.Add(new Rectangle3d(Plane.WorldXY, this.max_skin_width, this.max_skin_height));
+            this.skin.Add(new Rectangle3d(Plane.WorldXY, this.skin_width, this.skin_height));
         }
+
         public void multiple_skin()
         {
-            for(int skin_width = 0; skin_width <= this.max_skin_width; skin_width++)
+            for(int skin_width = 0; skin_width <= this.skin_width * (1.0 + this.deviation); skin_width++)
             {
-                for(int skin_height = 0; skin_height <= this.max_skin_height; skin_height++)
+                for(int skin_height = 0; skin_height <= this.skin_height * (1.0 + this.deviation); skin_height++)
                 {
                     if(skin_width * skin_height >= this.area * (1.0 - this.deviation))
                     {

@@ -24,6 +24,7 @@ namespace core_generator
         private int max_core_count;
         private double efficiency;
         private double deviation;
+        private List<Rectangle3d> cores;
 
         public gen_core(int core_min_width, int core_min_height, ref Rectangle3d skin, int max_core_count, double efficiency, double deviation)
         {
@@ -54,31 +55,24 @@ namespace core_generator
 
         public void create_cores()
         {
-            double min_core_area = (this.skin.Width * this.skin.Height) * this.efficiency;
-            double remaining_core_area = min_core_area;
-            if(this.max_core_count > 0)
-            {
-                double area = this.core_min_width * this.core_min_height;
-                remaining_core_area = min_core_area - (area * (this.max_core_count - 1));
-            }
+            double core_area = (this.skin.Width * this.skin.Height) * this.efficiency;
 
-            List<Rectangle3d> cores = new List<Rectangle3d>();
             for (int core_width = this.core_min_width; core_width <= this.skin.Width; core_width++)
             {
                 for (int core_height = this.core_min_height; core_height <= this.skin.Height; core_height++)
                 {
-                    if(min_core_area <= core_width * core_height && remaining_core_area >= core_width * core_height)
+                    if(core_area * (1.0 - deviation) <= core_width * core_height && core_area * (1.0 + deviation) >= core_width * core_height)
                     {
-                        cores.Add(new Rectangle3d(Plane.WorldXY, core_width, core_height));
+                        this.cores.Add(new Rectangle3d(Plane.WorldXY, core_width, core_height));
                     }
                 }
             }
         }
 
-
-
-
-
+        public void place_cores()
+        {
+            int possibilities = max_core_count
+        }
 
     }
 }
