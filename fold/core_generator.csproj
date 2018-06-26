@@ -49,7 +49,7 @@
     </Reference>
     <Reference Include="Grasshopper, Version=1.0.0.20, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\Grasshopper.dll</HintPath>
+      <HintPath>..\..\..\..\AppData\Roaming\Grasshopper\Libraries\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RhinoCommon">
@@ -65,6 +65,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CORE_GENERATOR_CLASSES\gen_core.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\gen_skin.cs" />
     <Compile Include="core_generator_INTEGRATION_CLASS.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\gen_dual_core.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\gen_pentagon_core.cs" />
