@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.csproj.user
 
 *.command.1.tlog
 *.write.1.tlog
