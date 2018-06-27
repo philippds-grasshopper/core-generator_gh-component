@@ -23,10 +23,13 @@ namespace core_generator
 
         public gen_skin(int skin_width, int skin_height, double deviation)
         {
+            Rhino.RhinoApp.WriteLine("INITIALIZED_SKIN");
+            this.skin = new List<Rectangle3d>();
             this.skin_width = skin_width;
             this.skin_height = skin_height;
             this.deviation = deviation;
             this.area = skin_width * skin_height;
+            compute();
         }
 
         public void compute()

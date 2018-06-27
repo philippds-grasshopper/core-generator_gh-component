@@ -42,6 +42,8 @@ namespace core_generator
 
             pManager.AddNumberParameter("efficiency", "efficiency", "value 0.0 - 1.0", GH_ParamAccess.item, 0.25);
             pManager.AddNumberParameter("deviation", "deviation", "value 0.0 - 1.0", GH_ParamAccess.item, 0.0);
+
+            pManager.AddIntegerParameter("max_core_count", "max_core_count", "max_core_count", GH_ParamAccess.item, 1);
         }
 
         /// <summary>
@@ -49,8 +51,8 @@ namespace core_generator
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddCurveParameter("skin", "skin", "skin", GH_ParamAccess.item);
-            pManager.AddPointParameter("grid_pts", "grid_pts", "grid_pts", GH_ParamAccess.list);
+            pManager.AddCurveParameter("skin", "skin", "skin", GH_ParamAccess.list);
+            pManager.AddPointParameter("grid_pts", "grid_pts", "grid_pts", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("grid_val", "grid_val", "grid_val", GH_ParamAccess.tree);
             pManager.AddCurveParameter("cores", "cores", "cores", GH_ParamAccess.tree);
         }
@@ -71,6 +73,7 @@ namespace core_generator
             int core_min_height = 0;
             double efficiency = 0;
             double deviation = 0.0;
+            int max_core_count = 1;
             
 
             DA.GetData(0, ref type_index);
@@ -82,16 +85,26 @@ namespace core_generator
             DA.GetData(6, ref core_min_height);
             DA.GetData(7, ref efficiency);
             DA.GetData(8, ref deviation);
+            DA.GetData(9, ref max_core_count);
 
-            generate_tower gt = new generate_tower(ref type_index, ref allow_skin_variation, ref max_skin_width, ref max_skin_height, ref allow_core_variation, ref core_min_width, ref core_min_height, ref efficiency, ref deviation);
+            generate_tower gt = new generate_tower(ref type_index, ref allow_skin_variation, ref max_skin_width, ref max_skin_height, ref allow_core_variation, ref core_min_width, ref core_min_height, ref efficiency, ref deviation, ref max_core_count);
 
             switch (type_index)
             {
                 case 0:
+
+
+                    DA.SetDataList(0, gt.variable_skin);
+                    DA.SetDataTree(1, gt.grid_pts_tree);
+                    DA.SetDataTree(2, gt.grid_val);
+                    DA.SetDataTree(3, gt.cores_2_tree);                 
+
+                    /*
                     DA.SetData(0, gt.skin);
                     DA.SetDataList(1, gt.grid_pts);
                     DA.SetDataTree(2, gt.grid_val);
                     DA.SetDataList(3, gt.cores);
+                    */
                     break;
                 case 1:
                     if (!allow_skin_variation) { DA.SetData(0, gt.skin); }

@@ -68,12 +68,13 @@
     <Compile Include="CORE_GENERATOR_CLASSES\gen_core.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\gen_skin.cs" />
     <Compile Include="core_generator_INTEGRATION_CLASS.cs" />
-    <Compile Include="CORE_GENERATOR_CLASSES\gen_dual_core.cs" />
-    <Compile Include="CORE_GENERATOR_CLASSES\gen_pentagon_core.cs" />
-    <Compile Include="CORE_GENERATOR_CLASSES\gen_single_core.cs" />
-    <Compile Include="CORE_GENERATOR_CLASSES\gen_skin_variety.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\old\gen_dual_core.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\old\gen_pentagon_core.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\old\gen_single_core.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\old\gen_skin_variety.cs" />
     <Compile Include="core_generator_MAIN.cs" />
     <Compile Include="core_generator_info.cs" />
+    <Compile Include="CORE_GENERATOR_CLASSES\core_permutations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
