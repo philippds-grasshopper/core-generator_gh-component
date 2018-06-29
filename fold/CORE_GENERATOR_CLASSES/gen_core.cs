@@ -127,6 +127,11 @@ namespace core_generator
             // sort cores and values into trees
             for (int i = 0; i < this.valid_core_combinations.Count; i++)
             {
+
+
+
+
+
                 this.valid_cores.EnsurePath(i);
                 this.values.EnsurePath(i);
 
