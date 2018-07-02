@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Rhino.Geometry;
 using Grasshopper;
+using System;
+using System.Linq;
 
 namespace core_generator
 {
@@ -16,6 +18,7 @@ namespace core_generator
         private double deviation;
         private List<Rectangle3d> cores;
         private List<List<int>> valid_core_combinations;
+        private List<List<int>> valid_core_locations;
         public DataTree<Rectangle3d> valid_cores;
 
         public gen_core(int core_min_width, int core_min_height, Rectangle3d skin, int max_core_count, double efficiency, double deviation)
@@ -41,6 +44,8 @@ namespace core_generator
             create_locations();
             create_cores();
             evaluate_core_combinations();
+            create_core_location_combinations();
+            place_cores();
             Rhino.RhinoApp.WriteLine("computed the cores");
         }
 
@@ -99,6 +104,51 @@ namespace core_generator
             }
         }
 
+        private List<List<int>> cull_duplicate_combinations(ref List<List<int>> TestData)
+        {
+            // Sort every list in the list 
+            for (int i = 0; i < TestData.Count; i++)
+                TestData[i].Sort();
+
+            /*
+            // Order the list of lists using a lexicographic sort
+            TestData.Sort((x, y) => {
+                var result = x.Zip(y, Tuple.Create)
+                               .Select(z => z.Item1.CompareTo(z.Item2))
+                               .FirstOrDefault(k => k != 0);
+                return result == 0 && !x.Any() ? -1 : result;
+            });
+            */
+
+            var sorted = TestData;
+
+            // Iterating through the ordered list of list to spot the duplicates
+            List<int> t = null;
+            List<List<int>> culled_list = new List<List<int>>();
+            int cpt = 1;
+            foreach (var l in sorted)
+            {
+                if (t != null)  // do nothing for the very first list
+                {
+                    // in all other cases, compare list with the previous one
+                    var a = t.SequenceEqual(l);
+                    if (a) { cpt++; }
+                    else   // if not, show the duplicates and restart counting
+                    {
+                        culled_list.Add(t);
+                        cpt = 1;
+                    }
+                }
+                t = l;
+            }
+            if (t != null)  // process the last element outside the loop
+            {
+                culled_list.Add(t);
+            }
+
+            return culled_list;
+        }
+
         private void evaluate_core_combinations()
         {
             MultiCombinations all_combinations = new MultiCombinations(this.cores.Count, this.max_core_count);
@@ -120,33 +170,89 @@ namespace core_generator
                     this.valid_core_combinations.Add(combination);
                 }
             }
+
+            //this.valid_core_combinations = cull_duplicate_combinations(ref this.valid_core_combinations);
+        }
+
+
+
+        private void create_core_location_combinations()
+        {
+            int core_count = this.max_core_count;
+
+            List<int> single_combination = new List<int>();
+            for(int i = 0; i < core_count; i++)
+            {
+                single_combination.Add(0);
+            }
+
+            this.valid_core_locations = new List<List<int>>();
+            while(single_combination[0] < this.locations.Count)
+            {
+                List<int> temp = new List<int>(single_combination);
+                this.valid_core_locations.Add(temp);
+                single_combination[single_combination.Count - 1]++;
+
+                for(int i = 0; i < single_combination.Count; i++)
+                {
+                    if(single_combination[i] == this.locations.Count - 1 && single_combination.Count > 1 && i > 0)
+                    {
+                        single_combination[i] = 0;
+                        single_combination[i - 1]++;
+                    }
+                }
+            }            
         }
 
         private void place_cores()
-        {
+        {            
             // sort cores and values into trees
             for (int i = 0; i < this.valid_core_combinations.Count; i++)
             {
-
-
-
-
-
-                this.valid_cores.EnsurePath(i);
-                this.values.EnsurePath(i);
-
-                List<int> default_values = new List<int>();
-                for (int j = 0; j < this.locations.Count; j++)
+                for (int j = 0; j < this.valid_core_locations.Count; j++)
                 {
-                    default_values.Add(1);
-                }
+                    int test = 0;
+                    for (int k = 0; k < this.valid_core_combinations[i].Count; k++)
+                    {
+                        if (!((this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width) <= this.skin.Width &&
+                              (this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height) <= this.skin.Height))
+                        {
+                            for (int l = 0; l < this.valid_core_combinations[i].Count; l++)
+                            {
+                                if (k != l)
+                                {
 
-                foreach (int c in this.valid_core_combinations[i])
-                {
-                    this.valid_cores.Add(cores[c]);
-                    replace_core_values(ref this.locations, ref default_values, cores[c]);
+                                    if (!((this.locations[valid_core_locations[j][k]].X >= this.locations[valid_core_locations[j][l]].X + this.cores[this.valid_core_combinations[i][l]].Width ||
+                                    this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width <= this.locations[valid_core_locations[j][l]].X ||
+                                    this.locations[valid_core_locations[j][k]].Y >= this.locations[valid_core_locations[j][l]].Y + this.cores[this.valid_core_combinations[i][l]].Height ||
+                                    this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height <= this.locations[valid_core_locations[j][l]].Y)))
+                                    {
+                                        test++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (test == 0)
+                    {
+                        this.valid_cores.EnsurePath(new int[] { i, j });
+                        this.values.EnsurePath(new int[] { i, j });
+
+                        List<int> default_values = new List<int>();
+                        for (int m = 0; m < this.locations.Count; m++)
+                        {
+                            default_values.Add(1);
+                        }
+
+                        foreach (int c in this.valid_core_combinations[i])
+                        {
+                            this.valid_cores.Add(cores[c]);
+                            replace_core_values(ref this.locations, ref default_values, cores[c]);
+                        }
+                        this.values.AddRange(default_values);
+                    }
                 }
-                this.values.AddRange(default_values);
             }
         }
     }
