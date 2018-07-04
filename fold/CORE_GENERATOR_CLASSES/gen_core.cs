@@ -16,12 +16,14 @@ namespace core_generator
         private int max_core_count;
         private double efficiency;
         private double deviation;
+        private bool allow_core_variation;
         private List<Rectangle3d> cores;
         private List<List<int>> valid_core_combinations;
         private List<List<int>> valid_core_locations;
         public DataTree<Rectangle3d> valid_cores;
+        private double core_area;
 
-        public gen_core(int core_min_width, int core_min_height, Rectangle3d skin, int max_core_count, double efficiency, double deviation)
+        public gen_core(int core_min_width, int core_min_height, Rectangle3d skin, int max_core_count, double efficiency, double deviation, bool allow_core_variation)
         {
             Rhino.RhinoApp.WriteLine("INITIALIZED_CORES");
             this.core_min_width = core_min_width;
@@ -30,11 +32,13 @@ namespace core_generator
             this.max_core_count = max_core_count;
             this.efficiency = efficiency;
             this.deviation = deviation;
+            this.allow_core_variation = allow_core_variation;
 
             this.locations = new List<Point3d>();
             this.values = new DataTree<int>();
             this.cores = new List<Rectangle3d>();
             this.valid_cores = new DataTree<Rectangle3d>();
+            this.core_area = this.skin.Area * this.efficiency;
 
             compute();
         }
@@ -42,7 +46,14 @@ namespace core_generator
         private void compute()
         {
             create_locations();
-            create_cores();
+            if(this.deviation != 0.0 && this.allow_core_variation)
+            {
+                create_variant_cores();
+            }
+            else
+            {
+                create_invariant_cores();
+            }
             evaluate_core_combinations();
             create_core_location_combinations();
             place_cores();
@@ -60,20 +71,30 @@ namespace core_generator
             }
         }
 
-        private void create_cores()
+        private void create_variant_cores()
         {
-            double core_area = this.skin.Area * this.efficiency;
-
             for (int core_width = this.core_min_width; core_width <= this.skin.Width; core_width++)
             {
                 for (int core_height = this.core_min_height; core_height <= this.skin.Height; core_height++)
                 {
-                    if(this.core_min_width * this.core_min_height <= core_width * core_height && core_area * (1.0 + deviation) >= core_width * core_height)
+                    if(this.core_min_width * this.core_min_height <= core_width * core_height && this.core_area * (1.0 + deviation) >= core_width * core_height)
                     {
                         this.cores.Add(new Rectangle3d(Plane.WorldXY, core_width, core_height));
                     }
                 }
             }
+        }
+
+        private void create_invariant_cores()
+        {            
+            if (this.core_area % this.max_core_count == 0)
+            {
+                double core_side = Math.Sqrt(this.core_area / this.max_core_count);
+                for(int i = 0; i < this.max_core_count; i++)
+                {
+                    this.cores.Add(new Rectangle3d(Plane.WorldXY, core_side, core_side));
+                }
+            }            
         }
 
         private bool point_in_polygon(Point3d[] polygon, Point3d point)
@@ -152,11 +173,10 @@ namespace core_generator
         private void evaluate_core_combinations()
         {
             MultiCombinations all_combinations = new MultiCombinations(this.cores.Count, this.max_core_count);
-            double core_default_area = this.skin.Area * this.efficiency;
             this.valid_core_combinations = new List<List<int>>();
 
             // validate core combination
-            foreach (var combination in all_combinations.combinations)
+            foreach (List<int> combination in all_combinations.combinations)
             {
                 double area_sum = 0;
                 
@@ -165,7 +185,7 @@ namespace core_generator
                     area_sum += this.cores[combination[i]].Area;
                 }
 
-                if (area_sum >= core_default_area * (1.0 - deviation) && area_sum <= core_default_area * (1.0 + deviation))
+                if (area_sum >= this.core_area * (1.0 - deviation) && area_sum <= this.core_area * (1.0 + deviation))
                 {
                     this.valid_core_combinations.Add(combination);
                 }
@@ -201,7 +221,18 @@ namespace core_generator
                         single_combination[i - 1]++;
                     }
                 }
-            }            
+            }
+            
+            
+            foreach(List<int> core_locations in this.valid_core_locations)
+            {
+                foreach(int index in core_locations)
+                {
+                    Rhino.RhinoApp.Write("{0} ", index);
+                }
+                Rhino.RhinoApp.Write("\n");
+            }
+            
         }
 
         private void place_cores()
@@ -209,35 +240,46 @@ namespace core_generator
             // sort cores and values into trees
             for (int i = 0; i < this.valid_core_combinations.Count; i++)
             {
+                int index = 0;
                 for (int j = 0; j < this.valid_core_locations.Count; j++)
                 {
                     int test = 0;
-                    for (int k = 0; k < this.valid_core_combinations[i].Count; k++)
+                    for (int k = 0; k < this.max_core_count; k++)
                     {
-                        if (!((this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width) <= this.skin.Width &&
-                              (this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height) <= this.skin.Height))
+                        if (// if cores do not overlap the skin
+                            (this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width) <= this.skin.Width &&
+                            (this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height) <= this.skin.Height)
                         {
-                            for (int l = 0; l < this.valid_core_combinations[i].Count; l++)
+                            if(this.max_core_count > 1)
                             {
-                                if (k != l)
+                                for (int l = 0; l < this.max_core_count; l++)
                                 {
-
-                                    if (!((this.locations[valid_core_locations[j][k]].X >= this.locations[valid_core_locations[j][l]].X + this.cores[this.valid_core_combinations[i][l]].Width ||
-                                    this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width <= this.locations[valid_core_locations[j][l]].X ||
-                                    this.locations[valid_core_locations[j][k]].Y >= this.locations[valid_core_locations[j][l]].Y + this.cores[this.valid_core_combinations[i][l]].Height ||
-                                    this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height <= this.locations[valid_core_locations[j][l]].Y)))
+                                    if (// if k && l are not the same
+                                        (k != l) &&
+                                        // if cores do not overlap each other
+                                        ((this.locations[valid_core_locations[j][k]].X >= this.locations[valid_core_locations[j][l]].X + this.cores[this.valid_core_combinations[i][l]].Width ||
+                                        this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width <= this.locations[valid_core_locations[j][l]].X) ||
+                                        (this.locations[valid_core_locations[j][k]].Y >= this.locations[valid_core_locations[j][l]].Y + this.cores[this.valid_core_combinations[i][l]].Height ||
+                                        this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height <= this.locations[valid_core_locations[j][l]].Y))
+                                        // if distance to corners is not smaller then escape distance
+                                        )
                                     {
                                         test++;
                                     }
                                 }
                             }
+                            else
+                            {
+                                test++;
+                            }
                         }
                     }
 
-                    if (test == 0)
+                    if (test == Math.Pow(this.max_core_count, 2) - this.max_core_count)
                     {
-                        this.valid_cores.EnsurePath(new int[] { i, j });
-                        this.values.EnsurePath(new int[] { i, j });
+                        this.valid_cores.EnsurePath(new int[] { i, index });
+                        this.values.EnsurePath(new int[] { i, index });
+                        index++;
 
                         List<int> default_values = new List<int>();
                         for (int m = 0; m < this.locations.Count; m++)
@@ -245,10 +287,14 @@ namespace core_generator
                             default_values.Add(1);
                         }
 
+                        int p = 0;
                         foreach (int c in this.valid_core_combinations[i])
                         {
-                            this.valid_cores.Add(new Rectangle3d(Plane.WorldXY, this.locations[c], new Point3d(this.locations[c].X + this.cores[c].Width, this.locations[c].Y + this.cores[c].Height, 0)));
-                            replace_core_values(ref this.locations, ref default_values, cores[c]);
+                            int vcl_index = this.valid_core_locations[j][p];
+                            Rectangle3d core = new Rectangle3d(Plane.WorldXY, new Point3d(this.locations[vcl_index]), new Point3d(this.locations[vcl_index].X + this.cores[c].Width, this.locations[vcl_index].Y + this.cores[c].Height, 0));
+                            this.valid_cores.Add(core);
+                            replace_core_values(ref this.locations, ref default_values, core);
+                            p++;
                         }
                         this.values.AddRange(default_values);
                     }

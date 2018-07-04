@@ -30,8 +30,6 @@ namespace core_generator
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("type", "type", "type", GH_ParamAccess.item, 0);
-
             pManager.AddBooleanParameter("allow_skin_variation", "allow_skin_variation", "allow_skin_variation", GH_ParamAccess.item, false);
             pManager.AddIntegerParameter("skin_width", "skin_width", "skin_width", GH_ParamAccess.item, 10);
             pManager.AddIntegerParameter("skin_height", "skin_height", "skin_height", GH_ParamAccess.item, 10);
@@ -64,7 +62,6 @@ namespace core_generator
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            int type_index = 0;
             bool allow_skin_variation = false;
             int max_skin_width = 0;
             int max_skin_height = 0;
@@ -75,57 +72,22 @@ namespace core_generator
             double deviation = 0.0;
             int max_core_count = 1;
             
+            DA.GetData(0, ref allow_skin_variation);
+            DA.GetData(1, ref max_skin_width);
+            DA.GetData(2, ref max_skin_height);
+            DA.GetData(3, ref allow_core_variation);
+            DA.GetData(4, ref core_min_width);
+            DA.GetData(5, ref core_min_height);
+            DA.GetData(6, ref efficiency);
+            DA.GetData(7, ref deviation);
+            DA.GetData(8, ref max_core_count);
 
-            DA.GetData(0, ref type_index);
-            DA.GetData(1, ref allow_skin_variation);
-            DA.GetData(2, ref max_skin_width);
-            DA.GetData(3, ref max_skin_height);
-            DA.GetData(4, ref allow_core_variation);
-            DA.GetData(5, ref core_min_width);
-            DA.GetData(6, ref core_min_height);
-            DA.GetData(7, ref efficiency);
-            DA.GetData(8, ref deviation);
-            DA.GetData(9, ref max_core_count);
+            generate_tower gt = new generate_tower(ref allow_skin_variation, ref max_skin_width, ref max_skin_height, ref allow_core_variation, ref core_min_width, ref core_min_height, ref efficiency, ref deviation, ref max_core_count);
 
-            generate_tower gt = new generate_tower(ref type_index, ref allow_skin_variation, ref max_skin_width, ref max_skin_height, ref allow_core_variation, ref core_min_width, ref core_min_height, ref efficiency, ref deviation, ref max_core_count);
-
-            switch (type_index)
-            {
-                case 0:
-
-
-                    DA.SetDataList(0, gt.variable_skin);
-                    DA.SetDataTree(1, gt.grid_pts_tree);
-                    DA.SetDataTree(2, gt.grid_val);
-                    DA.SetDataTree(3, gt.cores_2_tree);                 
-
-                    /*
-                    DA.SetData(0, gt.skin);
-                    DA.SetDataList(1, gt.grid_pts);
-                    DA.SetDataTree(2, gt.grid_val);
-                    DA.SetDataList(3, gt.cores);
-                    */
-                    break;
-                case 1:
-                    if (!allow_skin_variation) { DA.SetData(0, gt.skin); }
-                    else { DA.SetDataList(0, gt.variable_skin); }
-                    DA.SetDataList(1, gt.grid_pts);
-                    DA.SetDataTree(2, gt.grid_val);
-                    DA.SetDataTree(3, gt.cores_2_tree);
-                    break;
-                case 2:
-                    DA.SetData(0, gt.skin);
-                    DA.SetDataList(1, gt.grid_pts);
-                    DA.SetDataTree(2, gt.grid_val);
-                    DA.SetDataList(3, gt.irregular_cores);
-                    break;
-                case 3:
-                    DA.SetDataList(0, gt.variable_skin);
-                    DA.SetDataTree(1, gt.grid_pts_tree);
-                    DA.SetDataTree(2, gt.grid_val);
-                    DA.SetDataTree(3, gt.cores_2_tree);
-                    break;
-            }         
+            DA.SetDataList(0, gt.variable_skin);
+            DA.SetDataTree(1, gt.grid_pts_tree);
+            DA.SetDataTree(2, gt.grid_val);
+            DA.SetDataTree(3, gt.cores);
         }
 
         /// <summary>

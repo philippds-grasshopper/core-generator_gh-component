@@ -19,22 +19,24 @@ namespace core_generator
         private int skin_width;
         private int skin_height;
         private double deviation;
+        private bool allow_skin_variation;
         private int area;
 
-        public gen_skin(int skin_width, int skin_height, double deviation)
+        public gen_skin(int skin_width, int skin_height, double deviation, bool allow_skin_variation)
         {
             Rhino.RhinoApp.WriteLine("INITIALIZED_SKIN");
             this.skin = new List<Rectangle3d>();
             this.skin_width = skin_width;
             this.skin_height = skin_height;
             this.deviation = deviation;
+            this.allow_skin_variation = allow_skin_variation;
             this.area = skin_width * skin_height;
             compute();
         }
 
         public void compute()
         {
-            if(deviation != 0.0) { multiple_skin(); }
+            if(this.deviation != 0.0 && this.allow_skin_variation) { multiple_skin(); }
             else { single_skin(); }
         }
 

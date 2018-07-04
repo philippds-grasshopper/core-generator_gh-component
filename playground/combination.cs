@@ -13,7 +13,64 @@ public static class test
         //List<List<int>> list = new List<List<int>> { new List<int> { 0, 1 }, new List<int> { 0, 2 }, new List<int> { 1, 0 }, new List<int> { 3, 1 } };
         //List<List<int>> modified = new List<List<int>>();
 
+        void Permute(List<int> perm, int states, int count, List<List<int>> result)
+        {
+            if (count == 0)
+                return;
 
+            perm.Add(0);
+            Permute(perm, states, count - 1, result);
+
+            for (int i = 1; i < states; i++)
+            {
+                var copy = new List<int>(perm);
+                copy.Add(i);
+
+                result.Add(copy);
+                Permute(copy, states, count - 1, result);
+            }
+        }
+
+        void Permute2(HashSet<int> perm, int states, int count, List<HashSet<int>> result)
+        {
+            if (count == 0)
+                return;
+
+            if (perm.Add(0))
+                Permute2(perm, states, count - 1, result);
+
+            for (int i = 1; i < states; i++)
+            {
+                if (perm.Contains(i)) continue;
+
+                var copy = new HashSet<int>(perm);
+                copy.Add(i);
+
+                result.Add(copy);
+                Permute2(copy, states, count - 1, result);
+                Console.Write("doing something\n");
+            }
+        }
+
+        List<int> perms = new List<int>();
+        List<List<int>> perm_result = new List<List<int>>();
+
+        Permute(perms, 5, 4, perm_result);
+
+        foreach(List<int> hs in perm_result)
+        {
+            foreach(int i in hs)
+            {
+                Console.Write("{0} ", i);
+            }
+            Console.Write("\n");
+
+        }
+
+
+
+
+        /*
         List<List<int>> dist(List<List<int>> input)
         {
             var returnListList = new List<List<int>>();
@@ -73,8 +130,9 @@ public static class test
 
             return returnListList;
         }
+        */
 
-
+        /*
         bool AreSame(List<int> first, List<int> second)
         {
             // The Count properties of the lists are already checked and the same
@@ -118,7 +176,7 @@ public static class test
             Console.Write("incrementing index: {0}\n", single_combination.Count - 1);
             single_combination[single_combination.Count - 1]++;
 
-            /*
+            
             for (int i = 0; i < single_combination.Count; i++)
             {
                 if (single_combination[i] == locations.Count - 1 && single_combination.Count > 1 && i > 0)
@@ -127,8 +185,8 @@ public static class test
                     single_combination[i - 1]++;
                 }
             }
-            */
-        }
+            
+    }
                 
         foreach (List<int> l in valid_core_locations)
         {
@@ -139,7 +197,7 @@ public static class test
             Console.Write("\n");
         }
 
-        /*
+        
 
         
         modified = dist(list);
@@ -156,45 +214,6 @@ public static class test
 
 
 
-        void Permute(List<int> perm, int states, int count, List<List<int>> result)
-        {
-            if (count == 0)
-                return;
-
-            perm.Add(0);
-            Permute(perm, states, count - 1, result);
-
-            for (int i = 1; i < states; i++)
-            {
-                var copy = new List<int>(perm);
-                copy.Add(i);
-
-                result.Add(copy);
-                Permute(copy, states, count - 1, result);
-            }
-        }
-
-
-
-
-        void Permute2(HashSet<int> perm, int states, int count, List<HashSet<int>> result)
-        {
-            if (count == 0)
-                return;
-
-            if(perm.Add(0))
-                Permute2(perm, states, count - 1, result);
-
-            for (int i = 1; i < states; i++)
-            {
-                if (perm.Contains(i)) continue;
-
-                var copy = new HashSet<int>(perm);
-                copy.Add(i);
-
-                result.Add(copy);
-                Permute2(copy, states, count - 1, result);
-            }
-        }
+        
     }
 }
