@@ -247,7 +247,7 @@ namespace core_generator
 
                         foreach (int c in this.valid_core_combinations[i])
                         {
-                            this.valid_cores.Add(cores[c]);
+                            this.valid_cores.Add(new Rectangle3d(Plane.WorldXY, this.locations[c], new Point3d(this.locations[c].X + this.cores[c].Width, this.locations[c].Y + this.cores[c].Height, 0)));
                             replace_core_values(ref this.locations, ref default_values, cores[c]);
                         }
                         this.values.AddRange(default_values);
