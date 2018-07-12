@@ -10,9 +10,8 @@ namespace core_generator
         private int max_core_count;
         public List<List<int>> combinations;
 
-        public MultiCombinations(int cores, int max_core_count)
+        public MultiCombinations(int max_core_count)
         {
-            this.cores = cores;
             this.max_core_count = max_core_count;
             this.combinations = new List<List<int>>();
             compute();
@@ -20,7 +19,7 @@ namespace core_generator
 
         private void compute()
         {
-            var set = Enumerable.Range(0, this.cores).ToList();
+            var set = Enumerable.Range(0, this.max_core_count).ToList();
             var combinations = GenerateCombinations(set, this.max_core_count);
             this.combinations = combinations;
 

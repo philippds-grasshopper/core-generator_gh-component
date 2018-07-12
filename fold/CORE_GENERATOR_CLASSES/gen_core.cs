@@ -131,16 +131,6 @@ namespace core_generator
             for (int i = 0; i < TestData.Count; i++)
                 TestData[i].Sort();
 
-            /*
-            // Order the list of lists using a lexicographic sort
-            TestData.Sort((x, y) => {
-                var result = x.Zip(y, Tuple.Create)
-                               .Select(z => z.Item1.CompareTo(z.Item2))
-                               .FirstOrDefault(k => k != 0);
-                return result == 0 && !x.Any() ? -1 : result;
-            });
-            */
-
             var sorted = TestData;
 
             // Iterating through the ordered list of list to spot the duplicates
@@ -172,7 +162,7 @@ namespace core_generator
 
         private void evaluate_core_combinations()
         {
-            MultiCombinations all_combinations = new MultiCombinations(this.cores.Count, this.max_core_count);
+            MultiCombinations all_combinations = new MultiCombinations(this.max_core_count);
             this.valid_core_combinations = new List<List<int>>();
 
             // validate core combination
@@ -190,7 +180,6 @@ namespace core_generator
                     this.valid_core_combinations.Add(combination);
                 }
             }
-
             //this.valid_core_combinations = cull_duplicate_combinations(ref this.valid_core_combinations);
         }
 
@@ -233,6 +222,7 @@ namespace core_generator
                 Rhino.RhinoApp.Write("\n");
             }
             
+            
         }
 
         private void place_cores()
@@ -243,9 +233,11 @@ namespace core_generator
                 int index = 0;
                 for (int j = 0; j < this.valid_core_locations.Count; j++)
                 {
+
                     int test = 0;
                     for (int k = 0; k < this.max_core_count; k++)
                     {
+                        
                         if (// if cores do not overlap the skin
                             (this.locations[valid_core_locations[j][k]].X + this.cores[this.valid_core_combinations[i][k]].Width) <= this.skin.Width &&
                             (this.locations[valid_core_locations[j][k]].Y + this.cores[this.valid_core_combinations[i][k]].Height) <= this.skin.Height)
@@ -275,7 +267,7 @@ namespace core_generator
                         }
                     }
 
-                    if (test == Math.Pow(this.max_core_count, 2) - this.max_core_count)
+                    if ((test == Math.Pow(this.max_core_count, 2) - this.max_core_count) || (test == this.max_core_count))
                     {
                         this.valid_cores.EnsurePath(new int[] { i, index });
                         this.values.EnsurePath(new int[] { i, index });

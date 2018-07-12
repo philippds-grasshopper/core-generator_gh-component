@@ -20,7 +20,7 @@ public static class test
 
             perm.Add(0);
             Permute(perm, states, count - 1, result);
-
+                       
             for (int i = 1; i < states; i++)
             {
                 var copy = new List<int>(perm);
@@ -31,6 +31,22 @@ public static class test
             }
         }
 
+        List<int> perms = new List<int>();
+        List<List<int>> perm_result = new List<List<int>>();
+
+        Permute(perms, 2, 4, perm_result);
+
+        foreach (List<int> l in perm_result)
+        {
+            foreach (int item in l)
+            {
+                Console.Write(item);
+            }
+            Console.Write("\n");
+        }
+
+
+        /*
         void Permute2(HashSet<int> perm, int states, int count, List<HashSet<int>> result)
         {
             if (count == 0)
@@ -51,21 +67,20 @@ public static class test
                 Console.Write("doing something\n");
             }
         }
+        */
 
-        List<int> perms = new List<int>();
-        List<List<int>> perm_result = new List<List<int>>();
 
-        Permute(perms, 5, 4, perm_result);
-
+        /*
         foreach(List<int> hs in perm_result)
         {
             foreach(int i in hs)
             {
-                Console.Write("{0} ", i);
+                Console.Write(i + " ");
             }
             Console.Write("\n");
 
         }
+        */
 
 
 
@@ -214,6 +229,6 @@ public static class test
 
 
 
-        
+
     }
 }
