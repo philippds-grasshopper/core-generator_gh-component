@@ -6,7 +6,6 @@ namespace core_generator
 {
     public class MultiCombinations
     {
-        private int cores;
         private int max_core_count;
         public List<List<int>> combinations;
 
@@ -22,14 +21,6 @@ namespace core_generator
             var set = Enumerable.Range(0, this.max_core_count).ToList();
             var combinations = GenerateCombinations(set, this.max_core_count);
             this.combinations = combinations;
-
-            /*
-            foreach (var combination in combinations)
-            {
-                string combinationStr = string.Join(" ", combination);
-                Console.WriteLine(combinationStr);
-            }
-            */
         }
 
         private static List<List<T>> GenerateCombinations<T>(List<T> combinationList, int k)

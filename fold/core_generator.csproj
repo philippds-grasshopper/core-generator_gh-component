@@ -67,7 +67,6 @@
   <ItemGroup>
     <Compile Include="CORE_GENERATOR_CLASSES\gen_core.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\gen_skin.cs" />
-    <Compile Include="CORE_GENERATOR_CLASSES\perm.cs" />
     <Compile Include="core_generator_INTEGRATION_CLASS.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\old\gen_dual_core.cs" />
     <Compile Include="CORE_GENERATOR_CLASSES\old\gen_pentagon_core.cs" />
