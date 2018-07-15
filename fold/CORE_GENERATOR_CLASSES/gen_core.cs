@@ -58,7 +58,10 @@ namespace core_generator
                 create_invariant_cores();
                 Rhino.RhinoApp.WriteLine("computed {0} in-variant cores", this.cores.Count);
             }
-            evaluate_core_combinations();
+            if(this.max_core_count > 1)
+            {
+                evaluate_core_combinations();
+            }            
             //create_core_location_combinations();
             //create_core_location_combinations_1(this.max_core_count, this.locations.Count);
 
