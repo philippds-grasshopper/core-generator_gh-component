@@ -58,10 +58,8 @@ namespace core_generator
                 create_invariant_cores();
                 Rhino.RhinoApp.WriteLine("computed {0} in-variant cores", this.cores.Count);
             }
-            if(this.max_core_count > 1)
-            {
-                evaluate_core_combinations();
-            }            
+            evaluate_core_combinations();
+
             //create_core_location_combinations();
             //create_core_location_combinations_1(this.max_core_count, this.locations.Count);
 
@@ -98,7 +96,8 @@ namespace core_generator
         {            
             if (this.core_area % this.max_core_count == 0)
             {
-                double core_side = this.core_area / this.max_core_count;
+                double core_side = Math.Sqrt(this.core_area / this.max_core_count);
+
                 Rhino.RhinoApp.WriteLine("{0}", core_side);
                 for (int i = 0; i < this.max_core_count; i++)
                 {
@@ -370,10 +369,11 @@ namespace core_generator
         /// </summary>
         static IEnumerable<IEnumerable<int>> Count(int digits, int radix)
         {
-            var curr = new int[digits];
-            var n = Pow(radix, digits);
+            var curr = new int[digits]; // value array
+            var n = Pow(radix, digits); // total number of permutations
 
-            while (--n > 0L)
+
+            while (--n > 0L)            // loop through total number of permutation
             {
                 int i = 0;
 
@@ -413,9 +413,12 @@ namespace core_generator
             for (int i = 0; i < this.valid_core_combinations.Count; i++)
             {
                 Rhino.RhinoApp.WriteLine("doing something_1");
-                int index = 0;                    
+                int index = 0;
 
-                foreach (var perm in Count(this.locations.Count, this.max_core_count))
+                Rhino.RhinoApp.WriteLine("{0}; {1}", this.max_core_count, this.locations.Count);
+                Rhino.RhinoApp.WriteLine("{0}", Count(this.max_core_count, this.locations.Count).ToList().Count);
+
+                foreach (var perm in Count(this.max_core_count, this.locations.Count))
                 {
                     Rhino.RhinoApp.WriteLine("doing something_2");
                     int test = 0;
@@ -481,6 +484,7 @@ namespace core_generator
                             //Rhino.RhinoApp.WriteLine("valid core location index: {0}", vcl_index);
                             Rectangle3d core = new Rectangle3d(Plane.WorldXY, new Point3d(this.locations[vcl_index]), new Point3d(this.locations[vcl_index].X + this.cores[c].Width, this.locations[vcl_index].Y + this.cores[c].Height, 0));
                             this.valid_cores.Add(core);
+                            Rhino.RhinoApp.WriteLine("added core to list");
                             replace_core_values(ref this.locations, ref default_values, core);
                             p++;
                         }

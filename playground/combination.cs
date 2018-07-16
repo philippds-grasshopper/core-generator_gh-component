@@ -41,7 +41,8 @@ public static class test
         var curr = new int[digits]; // value array
         var n = Pow(radix, digits); // total number of permutations
 
-        
+        yield return curr;
+
         while (--n > 0L)            // loop through total number of permutation
         {
             int i = 0;
