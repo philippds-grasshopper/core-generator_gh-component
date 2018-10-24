@@ -25,7 +25,6 @@ namespace core_generator
 
         public gen_core(int core_min_width, int core_min_height, Rectangle3d skin, int max_core_count, double efficiency, double deviation, bool allow_core_variation)
         {
-            Rhino.RhinoApp.WriteLine("INITIALIZED_CORES");
             this.core_min_width = core_min_width;
             this.core_min_height = core_min_height;
             this.skin = skin;
@@ -47,24 +46,30 @@ namespace core_generator
 
         private void compute()
         {
+            Rhino.RhinoApp.Write("creating locations...");
             create_locations();
-            if(this.deviation != 0.0 && this.allow_core_variation)
+            Rhino.RhinoApp.Write("done!\n");
+
+            if (this.allow_core_variation)
             {
+                Rhino.RhinoApp.WriteLine("creating variant core(s)");
                 create_variant_cores();
-                Rhino.RhinoApp.WriteLine("computed {0} variant cores", this.cores.Count);
+                Rhino.RhinoApp.WriteLine("computed {0} variant core(s)", this.cores.Count);
             }
             else
-            {                
+            {
+                Rhino.RhinoApp.WriteLine("creating in-variant core(s)");
                 create_invariant_cores();
-                Rhino.RhinoApp.WriteLine("computed {0} in-variant cores", this.cores.Count);
+                Rhino.RhinoApp.WriteLine("computed {0} in-variant core(s)", this.cores.Count);
             }
             evaluate_core_combinations();
 
             //create_core_location_combinations();
             //create_core_location_combinations_1(this.max_core_count, this.locations.Count);
 
+            Rhino.RhinoApp.Write("placing core(s)...");
             place_cores();
-            Rhino.RhinoApp.WriteLine("computed the cores");
+            Rhino.RhinoApp.Write("done!\n");
         }
 
         private void create_locations()
@@ -84,7 +89,8 @@ namespace core_generator
             {
                 for (int core_height = this.core_min_height; core_height <= this.skin.Height; core_height++)
                 {
-                    if(this.core_min_width * this.core_min_height <= core_width * core_height && this.core_area * (1.0 + deviation) >= core_width * core_height)
+                    // this.core_min_width * this.core_min_height <= core_width * core_height && 
+                    if (this.core_area * (1.0 + deviation) >= core_width * core_height)
                     {
                         this.cores.Add(new Rectangle3d(Plane.WorldXY, core_width, core_height));
                     }
@@ -96,9 +102,9 @@ namespace core_generator
         {            
             if (this.core_area % this.max_core_count == 0)
             {
-                double core_side = Math.Sqrt(this.core_area / this.max_core_count);
+                double core_side = Math.Floor(Math.Sqrt(this.core_area / this.max_core_count));
 
-                Rhino.RhinoApp.WriteLine("{0}", core_side);
+                Rhino.RhinoApp.WriteLine("core side dimension = {0}", core_side);
                 for (int i = 0; i < this.max_core_count; i++)
                 {
                     this.cores.Add(new Rectangle3d(Plane.WorldXY, core_side, core_side));
@@ -168,42 +174,52 @@ namespace core_generator
 
             return culled_list;
         }
-
+        
         private void evaluate_core_combinations()
         {
-            MultiCombinations all_combinations = new MultiCombinations(this.max_core_count);
+            MultiCombinations all_combinations = new MultiCombinations(this.cores.Count, this.max_core_count);
 
-            
+            Rhino.RhinoApp.WriteLine("core combination count = {0}", all_combinations.combinations.Count);
+
+            int count = 0;
             foreach (List<int> combination in all_combinations.combinations)
             {
+                Rhino.RhinoApp.Write("core combination {0} = ", count);
                 foreach (int c in combination)
                 {
-                    Rhino.RhinoApp.Write("core combination: {0}, ", c);
+                    Rhino.RhinoApp.Write("{0}, ", c);
                 }
                 Rhino.RhinoApp.Write("\n");
+                count++;
             }
             
+            if(this.cores.Count != 0)
+            {
+                // validate core combination
+                foreach (List<int> combination in all_combinations.combinations)
+                {
+                    double area_sum = 0;
+                    for (int i = 0; i < combination.Count; i++)
+                    {
+                        area_sum += this.cores[combination[i]].Area;
+                    }
 
-            // validate core combination
-            foreach (List<int> combination in all_combinations.combinations)
-            {                
-                double area_sum = 0;
-                Rhino.RhinoApp.Write("checking core area\n");
-                for (int i = 0; i < combination.Count; i++)
-                {
-                    Rhino.RhinoApp.Write("adding area: {0}\n", this.cores[combination[i]].Area);
-                    area_sum += this.cores[combination[i]].Area;
-                }
-                Rhino.RhinoApp.Write("core area: {0}\n", area_sum);
-                if (area_sum >= this.core_area * (1.0 - deviation) && area_sum <= this.core_area * (1.0 + deviation))
-                {
-                    this.valid_core_combinations.Add(combination);
-                    Rhino.RhinoApp.Write("adding core to valid list\n");
+                    if (area_sum >= this.core_area * (1.0 - deviation) && area_sum <= this.core_area * (1.0 + deviation))
+                    {
+                        this.valid_core_combinations.Add(combination);
+                        Rhino.RhinoApp.WriteLine("adding core to valid cores list.");
+                    }
                 }
             }
+            else
+            {
+                Rhino.RhinoApp.WriteLine("No combinations possible.");
+            }
+            
             //this.valid_core_combinations = cull_duplicate_combinations(ref this.valid_core_combinations);
         }
 
+        // old solution
         /*
         private void create_core_location_combinations()
         {
@@ -372,6 +388,7 @@ namespace core_generator
             var curr = new int[digits]; // value array
             var n = Pow(radix, digits); // total number of permutations
 
+            yield return curr;          // return initial 0
 
             while (--n > 0L)            // loop through total number of permutation
             {
@@ -406,36 +423,32 @@ namespace core_generator
 
         private void place_cores()
         {
-            Rhino.RhinoApp.WriteLine("doing something_0");
-            Rhino.RhinoApp.WriteLine("combination count: {0}", this.valid_core_combinations.Count);
+            //Rhino.RhinoApp.WriteLine("loop level 0");
 
             // sort cores and values into trees
             for (int i = 0; i < this.valid_core_combinations.Count; i++)
             {
-                Rhino.RhinoApp.WriteLine("doing something_1");
+                //Rhino.RhinoApp.WriteLine("loop level 1");
                 int index = 0;
-
-                Rhino.RhinoApp.WriteLine("{0}; {1}", this.max_core_count, this.locations.Count);
-                Rhino.RhinoApp.WriteLine("{0}", Count(this.max_core_count, this.locations.Count).ToList().Count);
 
                 foreach (var perm in Count(this.max_core_count, this.locations.Count))
                 {
-                    Rhino.RhinoApp.WriteLine("doing something_2");
+                    //Rhino.RhinoApp.WriteLine("loop level 2");
                     int test = 0;
-
-
+                    
                     for (int k = 0; k < this.max_core_count; k++)
                     {
-                        if (// if cores do not overlap the skin
+                        // if cores do not overlap the skin
+                        if (
                         (this.locations[perm.ToArray()[k]].X + this.cores[this.valid_core_combinations[i][k]].Width) <= this.skin.Width &&
                         (this.locations[perm.ToArray()[k]].Y + this.cores[this.valid_core_combinations[i][k]].Height) <= this.skin.Height)
                         {
-                            //Rhino.RhinoApp.WriteLine("core not overlapping skin: {0}", j);
                             if (this.max_core_count > 1)
                             {
                                 for (int l = 0; l < this.max_core_count; l++)
                                 {
-                                    if (// if k && l are not the same
+                                    // if k && l are not the same
+                                    if (
                                         (k != l) &&
                                         // if cores do not overlap each other
                                         ((this.locations[perm.ToArray()[k]].X >= this.locations[perm.ToArray()[l]].X + this.cores[this.valid_core_combinations[i][l]].Width ||
@@ -443,6 +456,7 @@ namespace core_generator
                                         (this.locations[perm.ToArray()[k]].Y >= this.locations[perm.ToArray()[l]].Y + this.cores[this.valid_core_combinations[i][l]].Height ||
                                         this.locations[perm.ToArray()[k]].Y + this.cores[this.valid_core_combinations[i][k]].Height <= this.locations[perm.ToArray()[l]].Y))
                                         // if distance to corners is not smaller then escape distance
+                                        //
                                         )
                                     {
                                         test++;
@@ -455,18 +469,9 @@ namespace core_generator
                             }
                         }
                     }
-                    
-                    for (int k = 0; k < this.max_core_count; k++)
-                    {
-
-
-                    }
-
-                    Rhino.RhinoApp.WriteLine("doing something");
 
                     if ((test == Math.Pow(this.max_core_count, 2) - this.max_core_count) && (this.max_core_count != 1) || ((test == this.max_core_count) && (this.max_core_count == 1)))
                     {
-                        //Rhino.RhinoApp.WriteLine("valid core {0}", j);
                         this.valid_cores.EnsurePath(new int[] { i, index });
                         this.values.EnsurePath(new int[] { i, index });
                         index++;
@@ -481,10 +486,9 @@ namespace core_generator
                         foreach (int c in this.valid_core_combinations[i])
                         {
                             int vcl_index = perm.ToArray()[p];
-                            //Rhino.RhinoApp.WriteLine("valid core location index: {0}", vcl_index);
                             Rectangle3d core = new Rectangle3d(Plane.WorldXY, new Point3d(this.locations[vcl_index]), new Point3d(this.locations[vcl_index].X + this.cores[c].Width, this.locations[vcl_index].Y + this.cores[c].Height, 0));
                             this.valid_cores.Add(core);
-                            Rhino.RhinoApp.WriteLine("added core to list");
+                            //Rhino.RhinoApp.WriteLine("added core to list");
                             replace_core_values(ref this.locations, ref default_values, core);
                             p++;
                         }

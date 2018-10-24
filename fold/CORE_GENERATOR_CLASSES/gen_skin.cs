@@ -24,7 +24,6 @@ namespace core_generator
 
         public gen_skin(int skin_width, int skin_height, double deviation, bool allow_skin_variation)
         {
-            Rhino.RhinoApp.WriteLine("INITIALIZED_SKIN");
             this.skin = new List<Rectangle3d>();
             this.skin_width = skin_width;
             this.skin_height = skin_height;

@@ -35,8 +35,8 @@ namespace core_generator
             pManager.AddIntegerParameter("skin_height", "skin_height", "skin_height", GH_ParamAccess.item, 10);
 
             pManager.AddBooleanParameter("allow_core_variation", "allow_core_variation", "allow_core_variation", GH_ParamAccess.item, false);
-            pManager.AddIntegerParameter("core_min_width", "core_min_width", "core_min_width", GH_ParamAccess.item, 5);
-            pManager.AddIntegerParameter("core_min_height", "core_min_height", "core_min_height", GH_ParamAccess.item, 5);
+            pManager.AddIntegerParameter("core_min_width", "core_min_width", "core_min_width", GH_ParamAccess.item, 2);
+            pManager.AddIntegerParameter("core_min_height", "core_min_height", "core_min_height", GH_ParamAccess.item, 2);
 
             pManager.AddNumberParameter("efficiency", "efficiency", "value 0.0 - 1.0", GH_ParamAccess.item, 0.25);
             pManager.AddNumberParameter("deviation", "deviation", "value 0.0 - 1.0", GH_ParamAccess.item, 0.0);
